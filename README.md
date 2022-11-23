@@ -24,10 +24,10 @@
 
 a) [Концептуальная модель](https://github.com/alexbuyan/database_project/blob/main/models/2a.jpg)
 
-b) [Логическая модель]()
+b) [Логическая модель](https://github.com/alexbuyan/database_project/blob/main/models/2b.png)
 
 БД находится во 2-й нормальной форме
 
 Таблица Родителей/Контактов на случай ЧП будет версионной (SCD2)
 
-c) [Физическая модель]()
+c) [Физическая модель](https://github.com/alexbuyan/database_project/blob/main/models/2c.pdf)
