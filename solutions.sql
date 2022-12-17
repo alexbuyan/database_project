@@ -11,7 +11,7 @@ create table if not exists camp.parent(
     valid_from_date date not null check ( valid_from_date < valid_to_date ) default now(),
     parent_name varchar(50) not null,
     parent_phone varchar(50) check (regexp_match(parent_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull),
-    valid_to_date date not null check ( valid_from_date < parent.valid_to_date ),
+    valid_to_date date not null check ( valid_from_date < valid_to_date ),
 
     primary key (parent_id, valid_from_date)
 );
@@ -21,7 +21,7 @@ drop table if exists camp.child cascade;
 create table if not exists camp.child(
     child_id integer primary key,
     parent_id integer,
-    valid_from_date date default now(),
+    valid_from_date date not null default now(),
     child_name varchar(50) not null,
     child_age integer not null check ( child_age between 9 and 17),
     child_gender varchar(1) not null check ( child_gender in ('М', 'Ж') ),
