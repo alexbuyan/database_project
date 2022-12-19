@@ -10,7 +10,7 @@ create table if not exists camp.parent(
     parent_id integer,
     valid_from_date date not null check ( valid_from_date < valid_to_date ) default now(),
     parent_name varchar(50) not null,
-    parent_phone varchar(50) check (regexp_match(parent_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull),
+    parent_phone varchar(50) not null check (regexp_match(parent_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull),
     valid_to_date date not null check ( valid_from_date < valid_to_date ),
 
     primary key (parent_id, valid_from_date)
@@ -35,7 +35,7 @@ create table if not exists camp.director(
     director_id integer primary key,
     director_name varchar(50) not null,
     director_age integer not null check ( director_age between 18 and 65),
-    director_phone varchar(50) check (regexp_match(director_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
+    director_phone varchar(50) not null check (regexp_match(director_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
 );
 
 -- база отдыха
@@ -54,7 +54,7 @@ create table if not exists camp.session(
     director_id integer references camp.director(director_id) on delete set null,
     centre_id integer references camp.recreation_centre(centre_id) on delete set null,
     session_name varchar(50) not null,
-    session_duration integer check ( session_duration in (14, 21) ),
+    session_duration integer not null check ( session_duration in (14, 21) ),
     session_price integer not null check ( session_price >= 0 )
 );
 
@@ -64,7 +64,7 @@ create table if not exists camp.counselor(
     counselor_id integer primary key,
     counselor_name varchar(50) not null,
     counselor_age integer not null check ( counselor_age between 18 and 35),
-    counselor_phone varchar(50) check (regexp_match(counselor_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
+    counselor_phone varchar(50) not null check (regexp_match(counselor_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
 );
 
 -- врач на базе отдыха
@@ -73,14 +73,14 @@ create table if not exists camp.doctor(
     doctor_id integer primary key,
     centre_id integer references camp.recreation_centre(centre_id) on delete set null,
     doctor_name varchar(50) not null,
-    doctor_phone varchar(50) check (regexp_match(doctor_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
+    doctor_phone varchar(50) not null check (regexp_match(doctor_phone, '^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$') notnull)
 );
 
 -- смена <-> дети
 drop table if exists camp.session_x_child cascade;
 create table if not exists camp.session_x_child(
-    session_id integer references camp.session(session_id) on delete cascade,
-    child_id integer not null references camp.child(child_id) on delete cascade,
+    session_id integer references camp.session(session_id) on delete cascade on update cascade,
+    child_id integer not null references camp.child(child_id) on delete cascade on update cascade,
     voucher_id serial not null unique,
 
     primary key (session_id, child_id)
@@ -89,8 +89,8 @@ create table if not exists camp.session_x_child(
 -- вожатые <-> дети
 drop table if exists camp.counselor_x_child cascade;
 create table if not exists camp.counselor_x_child(
-    counselor_id integer references camp.counselor(counselor_id) on delete cascade,
-    child_id integer references camp.child(child_id) on delete cascade,
+    counselor_id integer references camp.counselor(counselor_id) on delete cascade on update cascade,
+    child_id integer references camp.child(child_id) on delete cascade on update cascade,
 
     primary key (counselor_id, child_id)
 );
@@ -98,8 +98,8 @@ create table if not exists camp.counselor_x_child(
 -- смена <-> вожатые
 drop table if exists camp.session_x_counselor cascade;
 create table if not exists camp.session_x_counselor(
-    session_id integer references camp.session(session_id) on delete cascade,
-    counselor_id integer references camp.counselor(counselor_id) on delete cascade,
+    session_id integer references camp.session(session_id) on delete cascade on update cascade,
+    counselor_id integer references camp.counselor(counselor_id) on delete cascade on update cascade,
     counselor_salary integer not null check ( counselor_salary >= 0 ),
 
     primary key (session_id, counselor_id)
