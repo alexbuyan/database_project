@@ -111,3 +111,63 @@ from
 );
 select * from camp_views.sessions_x_counselors;
 
+
+-- task 8
+
+-- для каждого ребенка вывести статистику по всем его сменам
+-- имя ребенка, название смены, кол-во дней смены, цена за смену
+-- отсортировать по именам детей, посчитать нарастающую сумму стоимости путевок на смену
+drop view if exists camp_views.child_session_stats;
+create view camp_views.child_session_stats as (
+select
+    c.child_name,
+    s.session_name,
+    s.session_duration,
+    s.session_price,
+    sum(s.session_price) over (partition by c.child_name order by s.session_id) as session_prices_cumulative
+from
+    camp.child c
+    inner join camp.session_x_child sxc on c.child_id = sxc.child_id
+    inner join camp.session s on s.session_id = sxc.session_id
+    order by c.child_name
+);
+select * from camp_views.child_session_stats;
+
+-- для каждой базы отдыха вывести статистику по сменам и детям
+-- название базы отдыха, локация, название смены, имя ребенка, который едет на смену
+-- отсортировать по названиям баз отдыха, посчитать нарастающее количество детей на каждой смене
+drop view if exists camp_views.recreation_centres_sessions_stats;
+create view camp_views.recreation_centres_sessions_stats as (
+select
+    rc.centre_name,
+    rc.centre_location,
+    s.session_name,
+    c.child_name,
+    count(c.child_id) over (partition by s.session_name order by c.child_id) as cnt_children_on_session
+from
+    camp.recreation_centre rc
+    inner join camp.session s on rc.centre_id = s.centre_id
+    inner join camp.session_x_child sxc on s.session_id = sxc.session_id
+    inner join camp.child c on c.child_id = sxc.child_id
+    order by rc.centre_name
+);
+select * from camp_views.recreation_centres_sessions_stats;
+
+-- для каждого вожатого вывести статистику
+-- имя вожатого, название смены на которую едет, зарплата за смену, суммарное количество смен
+-- отсортировать по имени вожатого, посчитать нарастающую зарплату по сменам
+drop view if exists camp_views.counselor_sessions_stats;
+create view camp_views.counselor_sessions_stats as (
+select
+    c.counselor_name,
+    s.session_name,
+    s.session_price,
+    count(s.session_id) over (partition by c.counselor_id) as total_session_cnt,
+    sum(s.session_price) over (partition by c.counselor_id order by s.session_id) as salary_cumulative_sum
+from
+    camp.counselor c
+    inner join camp.session_x_counselor sxc on c.counselor_id = sxc.counselor_id
+    inner join camp.session s on s.session_id = sxc.session_id
+    order by c.counselor_name
+);
+select * from camp_views.counselor_sessions_stats;
